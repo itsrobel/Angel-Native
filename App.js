@@ -1,26 +1,12 @@
-// import { StatusBar } from "expo-status-bar";
-// import { StyleSheet, Text, View } from "react-native";
-
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.pink}>
-//         Open up App.js to start working on your app!
-//       </Text>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// }
-
-// });
-
 import React, { useState } from "react";
 import {
   StyleSheet,
   View,
+  Text,
   TextInput,
   ScrollView,
   Pressable,
+  VirtualizedList,
 } from "react-native";
 import AudioRecorderPlayer from "react-native-audio-recorder-player";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -28,7 +14,23 @@ const App = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingPath, setRecordingPath] = useState(null);
   const [text, setText] = useState("");
-
+  const [items, setItems] = useState(["I", "Am", "King"]);
+  const renderItem = ({ item }) => {
+    return (
+      <View>
+        <Text>{item}</Text>
+      </View>
+    );
+  };
+  const getItem = (_, index) => {
+    return items[index] || index;
+  };
+  const getItemCount = () => {
+    return items.length;
+  };
+  const handleSubmit = () => {
+    setItems([...items, text]);
+  };
   const toggleRecording = async () => {
     const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
     if (status !== "granted") return;
@@ -57,36 +59,49 @@ const App = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      automaticallyAdjustKeyboardInsets={true}
-      contentContainerStyle={{ alignItems: "center" }}
-    >
-      <View style={{ position: "absolute", top: 100, flexDirection: "row" }}>
-        <TextInput
-          keyboardAppearance="dark"
-          style={{
-            borderRadius: 10,
-            fontSize: 24,
-            height: 30,
-            width: 300,
-            backgroundColor: "white",
-          }}
-          value={text}
-          onChangeText={(text) => setText(text)}
-        />
-        <Pressable onPress={toggleRecording}>
-          <Icon name="microphone" size={32} color="#fff" />
-        </Pressable>
-      </View>
-      <View style={{ height: 30 }} />
-    </ScrollView>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        automaticallyAdjustKeyboardInsets={true}
+        contentContainerStyle={{ alignItems: "center" }}
+      >
+        <View style={{ position: "absolute", top: 100, flexDirection: "row" }}>
+          <TextInput
+            keyboardAppearance="dark"
+            style={{
+              borderRadius: 10,
+              fontSize: 24,
+              height: 30,
+              width: 300,
+              backgroundColor: "white",
+              // position: "absolute",
+            }}
+            value={text}
+            onChangeText={(text) => setText(text)}
+            returnKeyType="send"
+            onSubmitEditing={(event) => handleSubmit(event.nativeEvent.text)}
+          />
+          <Pressable onPress={toggleRecording}>
+            <Icon name="microphone" size={32} color="#fff" />
+          </Pressable>
+        </View>
+      </ScrollView>
+      {/* <View style={{ height: 30 }} /> */}
+      <VirtualizedList
+        data={items}
+        // style={}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.toString()}
+        getItem={getItem}
+        getItemCount={getItemCount}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
+    flex: 1,
     backgroundColor: "#282828",
     // alignItems: "center",
     // justifyContent: "center",
